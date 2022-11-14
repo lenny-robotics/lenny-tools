@@ -9,7 +9,7 @@ namespace lenny::tools {
  */
 class Timer {
 public:
-    Timer() {}
+    Timer() = default;
     ~Timer() = default;
 
     void restart();

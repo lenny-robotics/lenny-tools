@@ -12,7 +12,7 @@ public:
     typedef std::unique_ptr<Gui> UPtr;
 
     //--- Constructor
-    Gui() {}
+    Gui() = default;
     virtual ~Gui() = default;
 
     //--- Handling

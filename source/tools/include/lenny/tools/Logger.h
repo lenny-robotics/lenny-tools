@@ -13,7 +13,7 @@ namespace lenny::tools {
 
 class Logger {
 private:  //Make private, since this is a purely static class
-    Logger() {}
+    Logger() = default;
     ~Logger() = default;
 
 public:
@@ -43,7 +43,7 @@ private:
         if (prio <= priority) {
             printf("%s", colorList[color].c_str());
             if (printExtendedInfo) {
-                printf("[%s] in ", std::string(magic_enum::enum_name(prio)).c_str());
+                printf("[LENNY](%s) in ", std::string(magic_enum::enum_name(prio)).c_str());
                 printf("'%s' at ", function);
                 printf("%s: ", utils::getCurrentDateAndTime().c_str());
             }
@@ -72,7 +72,7 @@ private:
         }
         if (file) {
             if (printExtendedInfo) {
-                fprintf(file, "[%s] in ", std::string(magic_enum::enum_name(prio)).c_str());
+                fprintf(file, "[LENNY](%s) in ", std::string(magic_enum::enum_name(prio)).c_str());
                 fprintf(file, "'%s' at ", function);
                 fprintf(file, "%s: ", utils::getCurrentDateAndTime().c_str());
             }
@@ -86,7 +86,7 @@ private:
     static void printToBuffer(bool printExtendedInfo, PRIORITY prio, COLOR color, const char* function, const char* message, Args... args) {
         std::string msg;
         if (printExtendedInfo) {
-            msg += getString("[%s] in ", std::string(magic_enum::enum_name(prio)).c_str());
+            msg += getString("[LENNY](%s) in ", std::string(magic_enum::enum_name(prio)).c_str());
             msg += getString("'%s' at ", function);
             msg += getString("%s: ", utils::getCurrentDateAndTime().c_str());
         }

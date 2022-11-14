@@ -12,7 +12,7 @@ public:
     typedef std::unique_ptr<Renderer> UPtr;
 
     //--- Constructor
-    Renderer() {}
+    Renderer() = default;
     virtual ~Renderer() = default;
 
     //--- Draw functions
