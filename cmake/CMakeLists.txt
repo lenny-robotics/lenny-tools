@@ -1,0 +1,18 @@
+include(FetchContent)
+include(CMakeDependentOption)
+
+function(capitalize output input)
+    set(var ${input})
+    string(REPLACE "-" "_" var ${var})
+    string(TOUPPER ${var} var)
+    set(${output} ${var} PARENT_SCOPE)
+endfunction()
+
+macro(fetch_repository repo)
+    FetchContent_GetProperties("${repo}")
+    if (NOT ${${repo}_POPULATED})
+        message(STATUS "Fetching repository '${repo}' ...")
+        FetchContent_Populate(${repo})
+    endif ()
+    mark_as_advanced(${${repo}_SOURCE_DIR})
+endmacro()
