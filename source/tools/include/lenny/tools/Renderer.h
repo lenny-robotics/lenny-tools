@@ -35,6 +35,7 @@ public:
                              const Eigen::Vector4d& color) const {}
     virtual void drawCapsule(const Eigen::Vector3d& COM, const Eigen::QuaternionD& orientation, const double& height, const double& radius,
                              const Eigen::Vector4d& color) const {}
+    virtual void drawTetrahedron(const std::array<Eigen::Vector3d, 4>& globalPoints, const Eigen::Vector4d& color) const {}
     virtual void drawLine(const std::vector<Eigen::Vector3d>& linePoints, const double& radius, const Eigen::Vector4d& color) const {}
     virtual void drawTrajectory(const std::vector<Eigen::Vector3d>& trajectoryPoints, const double& radius, const Eigen::Vector4d& color,
                                 const bool& showDots) const {}
