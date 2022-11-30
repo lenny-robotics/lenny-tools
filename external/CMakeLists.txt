@@ -1,3 +1,6 @@
+# set new cmake policy
+set_new_cmake_policy()
+
 # eigen
 if (NOT TARGET eigen)
     FetchContent_Declare(
