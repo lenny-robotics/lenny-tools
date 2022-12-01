@@ -17,7 +17,7 @@ public:
     static void sleep(const double time, bool waitAccurately = false);
 
 private:
-    typedef std::chrono::time_point<std::chrono::system_clock> TimePoint;
+    typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
     typedef std::chrono::duration<double> Duration;
 
     static TimePoint getCurrentTimePoint();

@@ -31,7 +31,6 @@ void test_utils() {
             for (auto p : hist) {
                 std::cout << std::fixed << std::setprecision(1) << std::setw(2) << p.first << ' ' << std::string(p.second / 200, '*') << '\n';
             }
-            std::cout << "-------------------------" << std::endl << std::endl;
         }
         std::cout << "-------------------------" << std::endl << std::endl;
     }
@@ -62,7 +61,7 @@ void test_utils() {
     }
 
     {
-        std::cout << "TEST - writeMatrixTo_File" << std::endl;
+        std::cout << "TEST - writeMatrixToFile" << std::endl;
         writeMatrixToFile(LENNY_PROJECT_FOLDER "/logs/vec.txt", Eigen::VectorXd::Random(5));
         writeMatrixToFile(LENNY_PROJECT_FOLDER "/logs/mat.txt", Eigen::MatrixXd::Random(2, 3));
         std::cout << "-------------------------" << std::endl << std::endl;
@@ -94,16 +93,14 @@ void test_utils() {
         std::cout << "-------------------------" << std::endl << std::endl;
     }
 
-    /*{
+    {
         std::cout << "TEST - browseFile" << std::endl;
         std::cout << browseFile() << std::endl;
         std::cout << "-------------------------" << std::endl << std::endl;
-    }*/
+    }
 
     {
         std::cout << "TEST - Eigen::to_string" << std::endl;
-        //Eigen::VectorXd matrix = Eigen::VectorXd::Random(5);
-        //Eigen::SparseMatrixD matrix = Eigen::MatrixXd::Random(3,3).sparseView();
         Eigen::MatrixXd matrix = Eigen::MatrixXd::Random(3, 3);
         std::cout << matrix << std::endl;
         std::cout << "........................." << std::endl;
