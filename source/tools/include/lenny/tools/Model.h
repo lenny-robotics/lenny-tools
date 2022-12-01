@@ -3,13 +3,15 @@
 #include <lenny/tools/Definitions.h>
 #include <lenny/tools/Typedefs.h>
 
+#include <optional>
+
 namespace lenny::tools {
 
 class Model {
 public:
     //--- Typedefs
     LENNY_GENERAGE_TYPEDEFS(Model);
-    typedef std::function<void(tools::Model::UPtr& model, const std::string& filePath)> F_loadModel;
+    typedef std::function<void(tools::Model::UPtr &model, const std::string &filePath)> F_loadModel;
 
     //--- Constructor
     Model(const std::string &filePath) : filePath(filePath) {}

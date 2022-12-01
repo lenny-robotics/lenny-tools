@@ -1,9 +1,13 @@
-#include <sys/stat.h>
 #include <lenny/tools/Logger.h>
 #include <lenny/tools/Utils.h>
+#include <sys/stat.h>
 
 #include <ctime>
 #include <fstream>
+
+#if WIN32
+#include <windows.h>
+#endif
 
 namespace lenny::tools::utils {
 
@@ -91,14 +95,28 @@ bool checkFileExtension(const std::string& filePath, const std::string& extensio
 }
 
 void createDirectory(const std::string& dir) {
+#if WIN32
+    const std::string stemp = std::string(dir.begin(), dir.end());
+    LPCSTR sw = stemp.c_str();
+    if (CreateDirectory(sw, nullptr)) {
+        // Directory created
+    } else if (ERROR_ALREADY_EXISTS == GetLastError()) {
+        // Directory already exists
+    } else {
+        // Something went wrong
+        LENNY_LOG_WARNING("Directory `%s` could not be created!", dir.c_str());
+    }
+#else
     //Check if directory exists
     struct stat buffer;
     if (stat(dir.c_str(), &buffer) == 0)
         return;
+
     //If not, create directory
     const int dir_err = mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (dir_err == -1)
-        LENNY_LOG_WARNING("Directory could not be created! Abort...");
+        LENNY_LOG_WARNING("Directory `%s` could not be created!", dir.c_str());
+#endif
 }
 
 std::string getCurrentDateAndTime() {
@@ -112,6 +130,34 @@ std::string getCurrentDateAndTime() {
 }
 
 std::string browseFile() {
+#if WIN32
+    const int bufferSize = MAX_PATH;
+    char currentDir[bufferSize];
+    if (!GetCurrentDirectory(bufferSize, currentDir))
+        LENNY_LOG_WARNING("Unable to GET current directory")
+
+    OPENFILENAME ofn;
+    char szFile[100];
+
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = nullptr;
+    ofn.lpstrFile = szFile;
+    ofn.lpstrFile[0] = '\0';
+    ofn.nMaxFile = sizeof(szFile);
+    ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+    ofn.nFilterIndex = 1;
+    ofn.lpstrFileTitle = nullptr;
+    ofn.nMaxFileTitle = 0;
+    ofn.lpstrInitialDir = nullptr;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+    GetOpenFileName(&ofn);
+
+    if (!SetCurrentDirectory(currentDir))
+        LENNY_LOG_WARNING("Unable to SET current directory")
+
+    return std::string(szFile);
+#else
     std::string openString = "zenity --file-selection --filename=";
     FILE* f = popen(openString.c_str(), "r");
     char file[1024];
@@ -119,6 +165,7 @@ std::string browseFile() {
     std::string filePath = std::string(file);
     filePath.erase(std::remove(filePath.begin(), filePath.end(), '\n'), filePath.end());
     return filePath;
+#endif
 }
 
 }  // namespace lenny::tools::utils

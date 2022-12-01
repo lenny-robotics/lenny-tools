@@ -1,7 +1,11 @@
-#include <cxxabi.h>
 #include <lenny/tools/Json.h>
 
-#include <iostream>
+#if WIN32
+const char* demangle(const char* name) {
+    return name;
+}
+#else
+#include <cxxabi.h>
 
 const char* demangle(const char* name) {
     char buf[1024];
@@ -10,3 +14,4 @@ const char* demangle(const char* name) {
     char* res = abi::__cxa_demangle(name, buf, &size, &status);
     return res;
 }
+#endif

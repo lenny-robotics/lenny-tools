@@ -1,5 +1,7 @@
 #pragma once
+#if !defined WIN32
 #pragma GCC diagnostic ignored "-Wformat-security"
+#endif
 
 #include <lenny/tools/Utils.h>
 
@@ -151,8 +153,18 @@ private:
 }  // namespace lenny::tools
 
 //--- Macros
+#ifdef NDEBUG
+#define LENNY_FUNCTION __FUNCTION__
+#else
+#if WIN32
+#define LENNY_FUNCTION __FUNCSIG__
+#else
+#define LENNY_FUNCTION __PRETTY_FUNCTION__
+#endif
+#endif
+
 #define LENNY_LOG_PRINT(color, msg, ...) lenny::tools::Logger::print(color, msg, ##__VA_ARGS__);
-#define LENNY_LOG_ERROR(msg, ...) lenny::tools::Logger::error(__FUNCTION__, msg, ##__VA_ARGS__);
-#define LENNY_LOG_WARNING(msg, ...) lenny::tools::Logger::warning(__FUNCTION__, msg, ##__VA_ARGS__);
-#define LENNY_LOG_INFO(msg, ...) lenny::tools::Logger::info(__FUNCTION__, msg, ##__VA_ARGS__);
-#define LENNY_LOG_DEBUG(msg, ...) lenny::tools::Logger::debug(__FUNCTION__, msg, ##__VA_ARGS__);
+#define LENNY_LOG_ERROR(msg, ...) lenny::tools::Logger::error(LENNY_FUNCTION, msg, ##__VA_ARGS__);
+#define LENNY_LOG_WARNING(msg, ...) lenny::tools::Logger::warning(LENNY_FUNCTION, msg, ##__VA_ARGS__);
+#define LENNY_LOG_INFO(msg, ...) lenny::tools::Logger::info(LENNY_FUNCTION, msg, ##__VA_ARGS__);
+#define LENNY_LOG_DEBUG(msg, ...) lenny::tools::Logger::debug(LENNY_FUNCTION, msg, ##__VA_ARGS__);
