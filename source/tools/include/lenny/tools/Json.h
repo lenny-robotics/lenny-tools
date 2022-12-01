@@ -13,9 +13,8 @@ using json = nlohmann::json;
 /**
  * Helpers
  */
-
-const char* demangle(const char* name);
-#define TYPE_ID(x) demangle(std::string(typeid(x).name()).c_str())
+std::string demangle(const std::string& name);
+#define TYPE_ID(x) demangle(std::string(typeid(x).name()))
 
 #define TO_JSON(e, x) j[TYPE_ID(e)][#x] = e.x;
 #define FROM_JSON(e, x) e.x = j[TYPE_ID(e)].value(#x, decltype(e.x)());
