@@ -1,5 +1,5 @@
 #pragma once
-#if UNIX
+#if !defined WIN32
 #pragma GCC diagnostic ignored "-Wformat-security"
 #endif
 
