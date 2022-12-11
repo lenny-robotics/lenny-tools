@@ -25,6 +25,8 @@ public:
 
 private:
     //--- Private helpers
+    static void initialize();
+
     template <typename... Args>
     static std::string getString(const char* format, Args... args) {
         int size_s = std::snprintf(nullptr, 0, format, args...) + 1;  // Extra space for '\0'
@@ -38,6 +40,9 @@ private:
 
     template <typename... Args>
     static void print(bool printExtendedInfo, PRIORITY prio, COLOR color, const char* function, const char* message, Args... args) {
+        //Initialize
+        initialize();
+
         //Lock scope
         std::scoped_lock lock(logMutex);
 
