@@ -41,6 +41,10 @@ public:
                                 const bool& showDots) const {}
     virtual void drawSector(const Eigen::Vector3d& center, const Eigen::QuaternionD& orientation, const double& radius,
                             const std::pair<double, double>& angleRange, const Eigen::Vector4d& color) const {}
+    virtual void drawRoundedCuboid(const Eigen::Vector3d& COM, const Eigen::QuaternionD& orientation, const Eigen::Vector3d& dimensions, const double& radius,
+                                   const Eigen::Vector4d& color) const;
+    virtual void drawRoundedPlane(const Eigen::Vector3d& COM, const Eigen::QuaternionD& orientation, const Eigen::Vector2d& dimensions, const double& radius,
+                                  const Eigen::Vector4d& color) const;
 
 public:
     //--- Static member
