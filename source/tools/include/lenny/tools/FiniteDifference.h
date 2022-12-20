@@ -48,9 +48,6 @@ public:
     bool performCheck(const Eigen::MatrixXd& estimate, const Eigen::MatrixXd& analytic, const std::string& name) const;
     bool performCheck(const Eigen::TensorD& estimate, const Eigen::TensorD& analytic, const std::string& name) const;
 
-    //--- Helpers
-    bool isCheckBeingApplied() const;
-
 public:
     //--- Members
     std::string description;  //Set by constructor
@@ -63,9 +60,6 @@ public:
     double relTol = 1e-4;
     double absTol = 1e-6;
     double eps = 1e-10;
-
-private:
-    mutable bool checkIsBeingApplied = false;
 };
 
 }  // namespace lenny::tools

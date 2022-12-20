@@ -124,13 +124,10 @@ bool FiniteDifference::testVector(const F_Val& eval, const F_Vec& ana, const Eig
     Eigen::VectorXd estimate = Eigen::VectorXd::Zero(x.size());
     Eigen::VectorXd analytic = Eigen::VectorXd::Zero(x.size());
 
-    checkIsBeingApplied = true;
     estimateVector(estimate, x, eval);
     if (f_PreEval)
         f_PreEval(x);
-    ;
     ana(analytic, x);
-    checkIsBeingApplied = false;
 
     return performCheck(estimate, analytic, name);
 }
@@ -143,8 +140,6 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_TripL& ana, const E
     Eigen::SparseMatrixD analytic(firstDim, secDim);
     Eigen::TripletDList tripL_tmp;
 
-    checkIsBeingApplied = true;
-
     tripL_tmp.clear();
     estimateMatrix(tripL_tmp, x, eval, firstDim, fullMatrix);
     estimate.setFromTriplets(tripL_tmp.begin(), tripL_tmp.end());
@@ -152,11 +147,8 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_TripL& ana, const E
     tripL_tmp.clear();
     if (f_PreEval)
         f_PreEval(x);
-    ;
     ana(tripL_tmp, x);
     analytic.setFromTriplets(tripL_tmp.begin(), tripL_tmp.end());
-
-    checkIsBeingApplied = false;
 
     return performCheck(estimate.toDense(), analytic.toDense(), name);
 }
@@ -168,18 +160,13 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_SMat& ana, const Ei
     Eigen::SparseMatrixD estimate(firstDim, secDim);
     Eigen::SparseMatrixD analytic(firstDim, secDim);
 
-    checkIsBeingApplied = true;
-
     estimate.setZero();
     estimateMatrix(estimate, x, eval, firstDim, fullMatrix);
 
     analytic.setZero();
     if (f_PreEval)
         f_PreEval(x);
-    ;
     ana(analytic, x);
-
-    checkIsBeingApplied = false;
 
     return performCheck(estimate.toDense(), analytic.toDense(), name);
 }
@@ -191,16 +178,10 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_DMat& ana, const Ei
     Eigen::MatrixXd estimate = Eigen::MatrixXd::Zero(firstDim, secDim);
     Eigen::MatrixXd analytic = Eigen::MatrixXd::Zero(firstDim, secDim);
 
-    checkIsBeingApplied = true;
-
     estimateMatrix(estimate, x, eval, firstDim, fullMatrix);
-
     if (f_PreEval)
         f_PreEval(x);
-    ;
     ana(analytic, x);
-
-    checkIsBeingApplied = false;
 
     return performCheck(estimate, analytic, name);
 }
@@ -223,16 +204,10 @@ bool FiniteDifference::testTensor(const F_SMat& eval, const F_Ten& ana, const Ei
     Eigen::TensorD estimate(Eigen::Vector3i(firstDim, secondDim, thirdDim));
     Eigen::TensorD analytic(Eigen::Vector3i(firstDim, secondDim, thirdDim));
 
-    checkIsBeingApplied = true;
-
     estimateTensor(estimate, x, eval, firstDim, secondDim);
-
     if (f_PreEval)
         f_PreEval(x);
-    ;
     ana(analytic, x);
-
-    checkIsBeingApplied = false;
 
     return performCheck(estimate, analytic, name);
 }
@@ -374,10 +349,6 @@ bool FiniteDifference::performCheck(const Eigen::TensorD& estimate, const Eigen:
         printEnd(checkSuccessful, description);
 
     return checkSuccessful;
-}
-
-bool FiniteDifference::isCheckBeingApplied() const {
-    return checkIsBeingApplied;
 }
 
 }  // namespace lenny::tools
