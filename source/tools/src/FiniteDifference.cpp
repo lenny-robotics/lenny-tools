@@ -4,10 +4,6 @@
 
 namespace lenny::tools {
 
-void FiniteDifference::setFDCheckIsBeingApplied(bool isBeingApplied) const {
-    fdCheckIsBeingApplied = isBeingApplied;
-}
-
 void FiniteDifference::estimateVector(Eigen::VectorXd& vec, const Eigen::VectorXd& x, const F_Val& eval) const {
     Eigen::VectorXd x_tmp(x);
     const uint size = (uint)x_tmp.size();
@@ -17,16 +13,18 @@ void FiniteDifference::estimateVector(Eigen::VectorXd& vec, const Eigen::VectorX
     double C_P, C_M;
     for (uint i = 0; i < size; i++) {
         double tmpVal = x_tmp(i);
-        x_tmp(i) = tmpVal + deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal + delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_P = eval(x_tmp);
 
-        x_tmp(i) = tmpVal - deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal - delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_M = eval(x_tmp);
 
         x_tmp(i) = tmpVal;
-        vec(i) += (C_P - C_M) / (2.0 * deltaFD);
+        vec(i) += (C_P - C_M) / (2.0 * delta);
     }
 }
 
@@ -38,18 +36,20 @@ void FiniteDifference::estimateMatrix(Eigen::TripletDList& tripL, const Eigen::V
     Eigen::VectorXd C_P(firstDim), C_M(firstDim), H_i_col(firstDim);
     for (uint i = 0; i < size; i++) {
         double tmpVal = x_tmp(i);
-        x_tmp(i) = tmpVal + deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal + delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_P.setZero();
         eval(C_P, x_tmp);
 
-        x_tmp(i) = tmpVal - deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal - delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_M.setZero();
         eval(C_M, x_tmp);
 
         x_tmp(i) = tmpVal;
-        H_i_col = (C_P - C_M) / (2.0 * deltaFD);
+        H_i_col = (C_P - C_M) / (2.0 * delta);
 
         uint j = i;
         if (fullMatrix || (size != firstDim))
@@ -90,18 +90,20 @@ void FiniteDifference::estimateTensor(Eigen::TensorD& ten, const Eigen::VectorXd
     Eigen::SparseMatrixD C_P(firstDim, secondDim), C_M(firstDim, secondDim), H_i(firstDim, secondDim);
     for (uint i = 0; i < x_tmp.size(); i++) {
         double tmpVal = x_tmp(i);
-        x_tmp(i) = tmpVal + deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal + delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_P.setZero();
         eval(C_P, x_tmp);
 
-        x_tmp(i) = tmpVal - deltaFD;
-        preFDEvaluation(x_tmp);
+        x_tmp(i) = tmpVal - delta;
+        if (f_PreEval)
+            f_PreEval(x_tmp);
         C_M.setZero();
         eval(C_M, x_tmp);
 
         x_tmp(i) = tmpVal;
-        H_i = (C_P - C_M) / (2.0 * deltaFD);
+        H_i = (C_P - C_M) / (2.0 * delta);
 
         for (int k = 0; k < H_i.outerSize(); ++k)
             for (Eigen::SparseMatrixD::InnerIterator it(H_i, k); it; ++it)
@@ -122,13 +124,15 @@ bool FiniteDifference::testVector(const F_Val& eval, const F_Vec& ana, const Eig
     Eigen::VectorXd estimate = Eigen::VectorXd::Zero(x.size());
     Eigen::VectorXd analytic = Eigen::VectorXd::Zero(x.size());
 
-    setFDCheckIsBeingApplied(true);
+    checkIsBeingApplied = true;
     estimateVector(estimate, x, eval);
-    preFDEvaluation(x);
+    if (f_PreEval)
+        f_PreEval(x);
+    ;
     ana(analytic, x);
-    setFDCheckIsBeingApplied(false);
+    checkIsBeingApplied = false;
 
-    return performFDCheck(estimate, analytic, name);
+    return performCheck(estimate, analytic, name);
 }
 
 bool FiniteDifference::testMatrix(const F_Vec& eval, const F_TripL& ana, const Eigen::VectorXd& x, const std::string& name, const uint& firstDim,
@@ -139,20 +143,22 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_TripL& ana, const E
     Eigen::SparseMatrixD analytic(firstDim, secDim);
     Eigen::TripletDList tripL_tmp;
 
-    setFDCheckIsBeingApplied(true);
+    checkIsBeingApplied = true;
 
     tripL_tmp.clear();
     estimateMatrix(tripL_tmp, x, eval, firstDim, fullMatrix);
     estimate.setFromTriplets(tripL_tmp.begin(), tripL_tmp.end());
 
     tripL_tmp.clear();
-    preFDEvaluation(x);
+    if (f_PreEval)
+        f_PreEval(x);
+    ;
     ana(tripL_tmp, x);
     analytic.setFromTriplets(tripL_tmp.begin(), tripL_tmp.end());
 
-    setFDCheckIsBeingApplied(false);
+    checkIsBeingApplied = false;
 
-    return performFDCheck(estimate.toDense(), analytic.toDense(), name);
+    return performCheck(estimate.toDense(), analytic.toDense(), name);
 }
 
 bool FiniteDifference::testMatrix(const F_Vec& eval, const F_SMat& ana, const Eigen::VectorXd& x, const std::string& name, const uint& firstDim,
@@ -162,18 +168,20 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_SMat& ana, const Ei
     Eigen::SparseMatrixD estimate(firstDim, secDim);
     Eigen::SparseMatrixD analytic(firstDim, secDim);
 
-    setFDCheckIsBeingApplied(true);
+    checkIsBeingApplied = true;
 
     estimate.setZero();
     estimateMatrix(estimate, x, eval, firstDim, fullMatrix);
 
     analytic.setZero();
-    preFDEvaluation(x);
+    if (f_PreEval)
+        f_PreEval(x);
+    ;
     ana(analytic, x);
 
-    setFDCheckIsBeingApplied(false);
+    checkIsBeingApplied = false;
 
-    return performFDCheck(estimate.toDense(), analytic.toDense(), name);
+    return performCheck(estimate.toDense(), analytic.toDense(), name);
 }
 
 bool FiniteDifference::testMatrix(const F_Vec& eval, const F_DMat& ana, const Eigen::VectorXd& x, const std::string& name, const uint& firstDim,
@@ -183,16 +191,18 @@ bool FiniteDifference::testMatrix(const F_Vec& eval, const F_DMat& ana, const Ei
     Eigen::MatrixXd estimate = Eigen::MatrixXd::Zero(firstDim, secDim);
     Eigen::MatrixXd analytic = Eigen::MatrixXd::Zero(firstDim, secDim);
 
-    setFDCheckIsBeingApplied(true);
+    checkIsBeingApplied = true;
 
     estimateMatrix(estimate, x, eval, firstDim, fullMatrix);
 
-    preFDEvaluation(x);
+    if (f_PreEval)
+        f_PreEval(x);
+    ;
     ana(analytic, x);
 
-    setFDCheckIsBeingApplied(false);
+    checkIsBeingApplied = false;
 
-    return performFDCheck(estimate, analytic, name);
+    return performCheck(estimate, analytic, name);
 }
 
 bool FiniteDifference::testTensor(const F_TripL& eval, const F_Ten& ana, const Eigen::VectorXd& x, const std::string& name, const uint& firstDim,
@@ -213,16 +223,18 @@ bool FiniteDifference::testTensor(const F_SMat& eval, const F_Ten& ana, const Ei
     Eigen::TensorD estimate(Eigen::Vector3i(firstDim, secondDim, thirdDim));
     Eigen::TensorD analytic(Eigen::Vector3i(firstDim, secondDim, thirdDim));
 
-    setFDCheckIsBeingApplied(true);
+    checkIsBeingApplied = true;
 
     estimateTensor(estimate, x, eval, firstDim, secondDim);
 
-    preFDEvaluation(x);
+    if (f_PreEval)
+        f_PreEval(x);
+    ;
     ana(analytic, x);
 
-    setFDCheckIsBeingApplied(false);
+    checkIsBeingApplied = false;
 
-    return performFDCheck(estimate, analytic, name);
+    return performCheck(estimate, analytic, name);
 }
 
 bool FiniteDifference::testTensor(const F_DMat& eval, const F_Ten& ana, const Eigen::VectorXd& x, const std::string& name, const uint& firstDim,
@@ -251,10 +263,10 @@ inline void printEnd(const bool& checkSuccessful, const std::string& description
     LENNY_LOG_PRINT(Logger::BLUE, "-----------------------------------------------------------------------------------------------------------\n");
 }
 
-bool FiniteDifference::performFDCheck(const Eigen::VectorXd& estimate, const Eigen::VectorXd& analytic, const std::string& name) const {
+bool FiniteDifference::performCheck(const Eigen::VectorXd& estimate, const Eigen::VectorXd& analytic, const std::string& name) const {
     using tools::Logger;
 
-    if (printTestMatricesToFile) {
+    if (printMatricesToFile) {
         const std::string estimatePath = LENNY_PROJECT_FOLDER "/logs/Est_" + name + "_" + description + ".m";
         utils::writeMatrixToFile(estimatePath, estimate);
 
@@ -262,32 +274,32 @@ bool FiniteDifference::performFDCheck(const Eigen::VectorXd& estimate, const Eig
         utils::writeMatrixToFile(analyticPath, analytic);
     }
 
-    if (printFDCheck)
+    if (printCheck)
         printStart(name, description, analytic.norm(), estimate.norm());
 
     bool checkSuccessful = true;
     for (int i = 0; i < estimate.size(); i++) {
         const double absErr = std::abs(estimate[i] - analytic[i]);
-        const double relError = 2.0 * absErr / (epsFD + std::abs(analytic[i]) + std::abs(estimate[i]));
-        if (relError > relTolFD && absErr > absTolFD) {
+        const double relError = 2.0 * absErr / (eps + std::abs(analytic[i]) + std::abs(estimate[i]));
+        if (relError > relTol && absErr > absTol) {
             checkSuccessful = false;
-            if (printFDCheck) {
+            if (printCheck) {
                 LENNY_LOG_PRINT(Logger::RED, "   MISMATCH");
                 LENNY_LOG_PRINT(Logger::DEFAULT, " -> Element: %d, Ana val: %lf, Est val: %lf, Error: %lf\n", i, analytic[i], estimate[i], absErr);
             }
         }
     }
 
-    if (printFDCheck)
+    if (printCheck)
         printEnd(checkSuccessful, description);
 
     return checkSuccessful;
 }
 
-bool FiniteDifference::performFDCheck(const Eigen::MatrixXd& estimate, const Eigen::MatrixXd& analytic, const std::string& name) const {
+bool FiniteDifference::performCheck(const Eigen::MatrixXd& estimate, const Eigen::MatrixXd& analytic, const std::string& name) const {
     using tools::Logger;
 
-    if (printTestMatricesToFile) {
+    if (printMatricesToFile) {
         const std::string estimatePath = LENNY_PROJECT_FOLDER "/logs/Est_" + name + "_" + description + ".m";
         utils::writeMatrixToFile(estimatePath, estimate);
 
@@ -295,7 +307,7 @@ bool FiniteDifference::performFDCheck(const Eigen::MatrixXd& estimate, const Eig
         utils::writeMatrixToFile(analyticPath, analytic);
     }
 
-    if (printFDCheck) {
+    if (printCheck) {
         const double ana_norm = (analytic.size() > 0 && estimate.size() > 0) ? analytic.norm() : 0.0;
         const double est_norm = (analytic.size() > 0 && estimate.size() > 0) ? estimate.norm() : 0.0;
         printStart(name, description, ana_norm, est_norm);
@@ -305,28 +317,28 @@ bool FiniteDifference::performFDCheck(const Eigen::MatrixXd& estimate, const Eig
     for (int i = 0; i < estimate.rows(); i++) {
         for (int j = 0; j < estimate.cols(); j++) {
             const double absErr = std::abs(estimate.coeff(i, j) - analytic.coeff(i, j));
-            const double relError = 2.0 * absErr / (epsFD + std::abs(estimate.coeff(i, j)) + std::abs(analytic.coeff(i, j)));
-            if (relError > relTolFD && absErr > absTolFD) {
+            const double relError = 2.0 * absErr / (eps + std::abs(estimate.coeff(i, j)) + std::abs(analytic.coeff(i, j)));
+            if (relError > relTol && absErr > absTol) {
                 checkSuccessful = false;
-                if (printFDCheck) {
+                if (printCheck) {
                     LENNY_LOG_PRINT(Logger::RED, "   MISMATCH");
                     LENNY_LOG_PRINT(Logger::DEFAULT, " -> Element: (%d, %d), Ana val: %lf, FD val: %lf. Error: %lf\n", i, j, analytic.coeff(i, j),
-                              estimate.coeff(i, j), absErr);
+                                    estimate.coeff(i, j), absErr);
                 }
             }
         }
     }
 
-    if (printFDCheck)
+    if (printCheck)
         printEnd(checkSuccessful, description);
 
     return checkSuccessful;
 }
 
-bool FiniteDifference::performFDCheck(const Eigen::TensorD& estimate, const Eigen::TensorD& analytic, const std::string& name) const {
+bool FiniteDifference::performCheck(const Eigen::TensorD& estimate, const Eigen::TensorD& analytic, const std::string& name) const {
     using tools::Logger;
 
-    if (printTestMatricesToFile) {
+    if (printMatricesToFile) {
         const std::string estimatePath = LENNY_PROJECT_FOLDER "/logs/Est_" + name + "_" + description + ".m";
         Eigen::TensorD::writeToFile(estimatePath, estimate);
 
@@ -334,7 +346,7 @@ bool FiniteDifference::performFDCheck(const Eigen::TensorD& estimate, const Eige
         Eigen::TensorD::writeToFile(analyticPath, analytic);
     }
 
-    if (printFDCheck)
+    if (printCheck)
         printStart(name, description, analytic.norm(), estimate.norm());
 
     bool checkSuccessful = true;
@@ -345,22 +357,27 @@ bool FiniteDifference::performFDCheck(const Eigen::TensorD& estimate, const Eige
                 const double fdValue = estimate.getEntry(Eigen::Vector3i(i, j, k));
                 const double anaValue = analytic.getEntry(Eigen::Vector3i(i, j, k));
                 const double absErr = std::abs(fdValue - anaValue);
-                const double relError = 2.0 * absErr / (epsFD + std::abs(fdValue) + std::abs(anaValue));
-                if (relError > relTolFD && absErr > absTolFD) {
+                const double relError = 2.0 * absErr / (eps + std::abs(fdValue) + std::abs(anaValue));
+                if (relError > relTol && absErr > absTol) {
                     checkSuccessful = false;
-                    if (printFDCheck) {
+                    if (printCheck) {
                         LENNY_LOG_PRINT(Logger::RED, "   MISMATCH");
-                        LENNY_LOG_PRINT(Logger::DEFAULT, " -> Element: (%d, %d, %d), Ana val: %lf, FD val: %lf. Error: %lf\n", i, j, k, anaValue, fdValue, absErr);
+                        LENNY_LOG_PRINT(Logger::DEFAULT, " -> Element: (%d, %d, %d), Ana val: %lf, FD val: %lf. Error: %lf\n", i, j, k, anaValue, fdValue,
+                                        absErr);
                     }
                 }
             }
         }
     }
 
-    if (printFDCheck)
+    if (printCheck)
         printEnd(checkSuccessful, description);
 
     return checkSuccessful;
+}
+
+bool FiniteDifference::isCheckBeingApplied() const {
+    return checkIsBeingApplied;
 }
 
 }  // namespace lenny::tools

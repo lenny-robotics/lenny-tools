@@ -3,10 +3,10 @@
 #include <lenny/tools/FiniteDifference.h>
 #include <lenny/tools/Utils.h>
 
-class FDTest : public lenny::tools::FiniteDifference {
+class FDTest {
 public:
-    FDTest() : lenny::tools::FiniteDifference("FDTest") {
-        printTestMatricesToFile = true;
+    FDTest() : fd("FDTest") {
+        fd.printMatricesToFile = true;
     }
     ~FDTest() = default;
 
@@ -60,44 +60,47 @@ public:
     void testFirstDerivativeWithFD(const Eigen::VectorXd& x) const {
         auto eval = [&](const Eigen::VectorXd& x) -> double { return computeValue(x); };
         auto ana = [&](Eigen::VectorXd& dvdx, const Eigen::VectorXd& x) -> void { computeFirstDerivative(dvdx, x); };
-        testVector(eval, ana, x, "dvdx");
+        fd.testVector(eval, ana, x, "dvdx");
     }
 
     void testSecondDerivativeWithFD_TripletList(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::VectorXd& dvdx, const Eigen::VectorXd& x) -> void { computeFirstDerivative(dvdx, x); };
         auto ana = [&](Eigen::TripletDList& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
-        testMatrix(eval, ana, x, "d2vdx2_tripL", x.size(), true);
+        fd.testMatrix(eval, ana, x, "d2vdx2_tripL", x.size(), true);
     }
 
     void testSecondDerivativeWithFD_SparseMatrix(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::VectorXd& dvdx, const Eigen::VectorXd& x) -> void { computeFirstDerivative(dvdx, x); };
         auto ana = [&](Eigen::SparseMatrixD& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
-        testMatrix(eval, ana, x, "d2vdx2_sMat", x.size(), true);
+        fd.testMatrix(eval, ana, x, "d2vdx2_sMat", x.size(), true);
     }
 
     void testSecondDerivativeWithFD_DenseMatrix(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::VectorXd& dvdx, const Eigen::VectorXd& x) -> void { computeFirstDerivative(dvdx, x); };
         auto ana = [&](Eigen::MatrixXd& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
-        testMatrix(eval, ana, x, "d2vdx2_dMat", x.size(), true);
+        fd.testMatrix(eval, ana, x, "d2vdx2_dMat", x.size(), true);
     }
 
     void testThirdDerivativeWithFD_TripletList(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::TripletDList& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
         auto ana = [&](Eigen::TensorD& d3vdx3, const Eigen::VectorXd& x) -> void { computeThirdDerivative(d3vdx3, x); };
-        testTensor(eval, ana, x, "d3vdx3_tripL", x.size(), x.size());
+        fd.testTensor(eval, ana, x, "d3vdx3_tripL", x.size(), x.size());
     }
 
     void testThirdDerivativeWithFD_SparseMatrix(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::SparseMatrixD& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
         auto ana = [&](Eigen::TensorD& d3vdx3, const Eigen::VectorXd& x) -> void { computeThirdDerivative(d3vdx3, x); };
-        testTensor(eval, ana, x, "d3vdx3_sMat", x.size(), x.size());
+        fd.testTensor(eval, ana, x, "d3vdx3_sMat", x.size(), x.size());
     }
 
     void testThirdDerivativeWithFD_DenseMatrix(const Eigen::VectorXd& x) const {
         auto eval = [&](Eigen::MatrixXd& d2vdx2, const Eigen::VectorXd& x) -> void { computeSecondDerivative(d2vdx2, x); };
         auto ana = [&](Eigen::TensorD& d3vdx3, const Eigen::VectorXd& x) -> void { computeThirdDerivative(d3vdx3, x); };
-        testTensor(eval, ana, x, "d3vdx3_dMat", x.size(), x.size());
+        fd.testTensor(eval, ana, x, "d3vdx3_dMat", x.size(), x.size());
     }
+
+public:
+    lenny::tools::FiniteDifference fd;
 };
 
 void test_finitedifference() {
