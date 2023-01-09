@@ -1,3 +1,7 @@
+#External
+add_subdirectory(external)
+
+#Project
 project(tools)
 
 file(GLOB sources

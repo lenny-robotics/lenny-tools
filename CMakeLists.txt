@@ -20,8 +20,5 @@ file(MAKE_DIRECTORY "logs")
 # CXX standard
 set(CMAKE_CXX_STANDARD 20)
 
-# External code
-add_subdirectory(external)
-
 # Source code
 add_subdirectory(source)
