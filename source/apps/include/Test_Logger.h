@@ -20,7 +20,7 @@ void test_logger() {
         threads[i].join();
 
     std::cout << "-------------------------- BUFFER TEST -------------------------------" << std::endl;
-    const std::vector<std::pair<Logger::COLOR, std::string>>& msgBuffer = Logger::getMessageBuffer();
+    const auto& msgBuffer = Logger::getMessageBuffer();
     for (const auto& [color, msg] : msgBuffer)
         std::cout << Logger::getColorString(color) << msg << Logger::getColorString(Logger::DEFAULT);
 }

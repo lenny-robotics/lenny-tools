@@ -6,10 +6,10 @@
 #include <lenny/tools/Utils.h>
 
 #include <array>
+#include <deque>
 #include <magic_enum.hpp>
 #include <memory>
 #include <mutex>
-#include <vector>
 
 namespace lenny::tools {
 
@@ -100,9 +100,9 @@ private:
         msg += getString(message, args...);
         if (printExtendedInfo)
             msg += getString("\n");
-        msgBuffer.emplace_back(std::pair<COLOR, std::string>{color, msg});
+        msgBuffer.push_back(std::pair<COLOR, std::string>{color, msg});
         if (msgBuffer.size() > maxNumBufferMsgs)
-            msgBuffer.erase(msgBuffer.begin());
+            msgBuffer.pop_front();
     }
 
 public:
@@ -135,8 +135,8 @@ public:
 
     //--- Public helpers
     static std::string getColorString(COLOR color);
-    static Eigen::Vector3d getColorVector(COLOR color);
-    static const std::vector<std::pair<COLOR, std::string>>& getMessageBuffer();
+    static std::array<double, 3> getColorArray(COLOR color);
+    static const std::deque<std::pair<COLOR, std::string>>& getMessageBuffer();
 
 public:
     //--- Public members
@@ -149,10 +149,10 @@ public:
 private:
     //--- Private members
     static std::array<std::string, 7> colorList;
-    static std::array<Eigen::Vector3d, 7> rgbList;
+    static std::array<std::array<double, 3>, 7> rgbList;
     static std::mutex logMutex;
     static FILE* file;
-    static std::vector<std::pair<COLOR, std::string>> msgBuffer;
+    static std::deque<std::pair<COLOR, std::string>> msgBuffer;
 };
 
 }  // namespace lenny::tools
