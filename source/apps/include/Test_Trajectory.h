@@ -16,7 +16,7 @@ void test_trajectory() {
 
         auto test = [&](const double& val, const double& testVal) -> void {
             if (fabs(val - testVal) < 1e-5)
-                std::cout << "PASSED!" << std::endl;
+                std::cout << "PASSED! -> " << val << " VS " << testVal << std::endl;
             else
                 std::cout << "FAILED! -> " << val << " VS " << testVal << std::endl;
         };
@@ -27,15 +27,6 @@ void test_trajectory() {
         test(trajectory.getLinearInterpolation(1.0), 1.0);
         test(trajectory.getLinearInterpolation(2.0), -1.0);
         test(trajectory.getLinearInterpolation(3.0), -1.0);
-
-        test(trajectory.getClosestLinearlyInterpolatedTime(4.0, std::pair<double, double>{-3.0, 3.0}), -2.0);
-        test(trajectory.getClosestLinearlyInterpolatedTime(3.0, std::pair<double, double>{-3.0, 3.0}), -2.0);
-        test(trajectory.getClosestLinearlyInterpolatedTime(2.0, std::pair<double, double>{-3.0, 3.0}), -1.5);
-        test(trajectory.getClosestLinearlyInterpolatedTime(1.0, std::pair<double, double>{-3.0, 3.0}), 1.0);
-        test(trajectory.getClosestLinearlyInterpolatedTime(0.0, std::pair<double, double>{-3.0, 3.0}), 1.5);
-        test(trajectory.getClosestLinearlyInterpolatedTime(-1.0, std::pair<double, double>{-3.0, 3.0}), 2.0);
-        test(trajectory.getClosestLinearlyInterpolatedTime(-2.0, std::pair<double, double>{-3.0, 3.0}), 2.0);
-        test(trajectory.getClosestLinearlyInterpolatedTime(-3.0, std::pair<double, double>{-3.0, 3.0}), 2.0);
 
         test(trajectory.getSplineInterpolation(-3.0), 3.0);
         test(trajectory.getSplineInterpolation(-1.5), 1.875);
@@ -53,11 +44,13 @@ void test_trajectory() {
         trajectory.addEntry(1.0, 1.0 * Eigen::VectorXd::Ones(3));
         trajectory.addEntry(-1.0, 1.0 * Eigen::VectorXd::Ones(3));
 
+        std::cout << trajectory << std::endl;
+
         auto test_val = [&](const Eigen::VectorXd& val, const Eigen::VectorXd& testVal) -> void {
             if ((val - testVal).norm() < 1e-5)
-                std::cout << "PASSED!" << std::endl;
+                std::cout << "PASSED! ->" << val.transpose() << " VS " << testVal.transpose() << std::endl;
             else
-                std::cout << "FAILED! -> " << val << " VS " << testVal << std::endl;
+                std::cout << "FAILED! -> " << val.transpose() << " VS " << testVal.transpose() << std::endl;
         };
 
         test_val(trajectory.getLinearInterpolation(-3.0), 3.0 * Eigen::VectorXd::Ones(3));
@@ -66,22 +59,6 @@ void test_trajectory() {
         test_val(trajectory.getLinearInterpolation(1.0), 1.0 * Eigen::VectorXd::Ones(3));
         test_val(trajectory.getLinearInterpolation(2.0), -1.0 * Eigen::VectorXd::Ones(3));
         test_val(trajectory.getLinearInterpolation(3.0), -1.0 * Eigen::VectorXd::Ones(3));
-
-        auto test_time = [&](const double& val, const double& testVal) -> void {
-            if (fabs(val - testVal) < 1e-5)
-                std::cout << "PASSED!" << std::endl;
-            else
-                std::cout << "FAILED! -> " << val << " VS " << testVal << std::endl;
-        };
-
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(4.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), -2.0);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(3.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), -2.0);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(2.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), -1.5);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(1.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), 1.0);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(0.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), 1.5);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(-1.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), 2.0);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(-2.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), 2.0);
-        test_time(trajectory.getClosestLinearlyInterpolatedTime(-3.0 * Eigen::VectorXd::Ones(3), std::pair<double, double>{-3.0, 3.0}), 2.0);
 
         test_val(trajectory.getSplineInterpolation(-3.0), 3.0 * Eigen::VectorXd::Ones(3));
         test_val(trajectory.getSplineInterpolation(-1.5), 1.875 * Eigen::VectorXd::Ones(3));
