@@ -28,7 +28,7 @@ public:
 
     virtual void PushItemWidth(float item_width) const {}
     virtual void PopItemWidth() const {}
-    
+
     virtual void SameLine(float offset_from_start_x = 0.f, float spacing = -1.f) const {}
     virtual void NewLine() const {}
 
@@ -84,6 +84,12 @@ public:
         return false;
     }
     virtual bool Input(const char* label, Eigen::VectorXd& value, const char* format = "%.6f", int flags = 0) const {
+        return false;
+    }
+    virtual bool Input(const char* label, Eigen::Matrix3d& value, const char* format = "%.6f", int flags = 0) const {
+        return false;
+    }
+    virtual bool Input(const char* label, Eigen::QuaternionD& value, const char* format = "%.6f", int flags = 0) const {
         return false;
     }
     virtual bool Input(const char* label, Transformation& trafo, const char* format = "%.6f") const {
