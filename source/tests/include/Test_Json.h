@@ -1,5 +1,6 @@
 #pragma once
 
+#include <gtest/gtest.h>
 #include <lenny/tools/Json.h>
 
 #include <fstream>
@@ -69,16 +70,13 @@ struct JsonTest {
 NLOHMANN_JSON_SERIALIZE_ENUM(JsonTest::TYPE, {{JsonTest::INVALID, nullptr}, {JsonTest::BUMBLEBEE, "BUMBLEBEE"}, {JsonTest::ANT, "ANT"}})
 }  // namespace test1::test2
 
-//------------------------------------------------------------------------------------------------------------------
-
-void test_json() {
+TEST(tools, Json) {
     const std::string filepath = LENNY_PROJECT_FOLDER "/logs/Test.json";
     test1::test2::JsonTest test_save, test_load;
 
     {  //Save to file
         std::ofstream file(filepath);
-        if (!file.is_open())
-            LENNY_LOG_ERROR("File %s could not be opened", filepath.c_str());
+        EXPECT_TRUE(file.is_open());
 
         json js;
         test1::test2::JsonTest::to_json(js, test_save);
@@ -88,32 +86,23 @@ void test_json() {
         std::cout << js << std::endl;
     }
 
-    {
+    { //Load from file
         test_load.setNewValues();
 
         json js_tmp;
         test1::test2::JsonTest::to_json(js_tmp, test_load);
         std::cout << js_tmp << std::endl;
-
-        if (!test_save.compare(test_load))
-            std::cout << "First test passed!" << std::endl;
-        else
-            std::cout << "First test failed" << std::endl;
+        EXPECT_FALSE(test_save.compare(test_load));
 
         std::ifstream file(filepath);
-        if (!file.is_open())
-            LENNY_LOG_ERROR("File %s could not be opened", filepath.c_str());
+        EXPECT_TRUE(file.is_open());
 
         json js;
         file >> js;
         test1::test2::JsonTest::from_json(js, test_load);
         file.close();
-
         std::cout << js << std::endl;
 
-        if (test_save.compare(test_load))
-            std::cout << "Second test passed!" << std::endl;
-        else
-            std::cout << "Second test failed" << std::endl;
+        EXPECT_TRUE(test_save.compare(test_load));
     }
 }

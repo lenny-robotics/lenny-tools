@@ -10,9 +10,13 @@ project(lenny-tools)
 # Build option
 capitalize(LENNY_PROJECT ${PROJECT_NAME})
 option(${LENNY_PROJECT}_BUILD_APPS "Build apps" ON)
+option(${LENNY_PROJECT}_BUILD_TESTS "Build tests" ON)
 
 # Project folder path
 set(LENNY_PROJECT_FOLDER "\"${CMAKE_CURRENT_LIST_DIR}\"" CACHE STRING "")
+
+# Include CTest (needs to be in "root" CMakeLists!)
+include(CTest)
 
 # Generate log directory
 file(MAKE_DIRECTORY "logs")

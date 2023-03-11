@@ -34,3 +34,17 @@ if (NOT TARGET nlohmann_json)
     target_include_directories(nlohmann_json SYSTEM INTERFACE $<BUILD_INTERFACE:${json_SOURCE_DIR}/include>)
 endif ()
 
+# googletest
+if (NOT TARGET googletest)
+    FetchContent_Declare(
+            googletest #
+            URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip #
+            URL_HASH MD5=A1279C6FB5BF7D4A5E0D0B2A4ADB39AC #
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE) #For Windows: Prevent overriding the parent project's compiler/linker settings
+    option(BUILD_GMOCK "Builds the googlemock subproject" OFF)
+    option(INSTALL_GTEST "Enable installation of googletest" OFF)
+    option(GTEST_HAS_ABSL "Use Abseil and RE2. Requires Abseil and RE2 to be separately added to the build." OFF)
+    message(STATUS "Fetching repository 'googletest' ...")
+    FetchContent_MakeAvailable(googletest)
+endif ()

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <gtest/gtest.h>
 #include <lenny/tools/Logger.h>
 #include <lenny/tools/Tensor.h>
 
 #include <iostream>
 
-void test_tensor() {
+TEST(tools, Tensor) {
     Eigen::TensorD tensor(Eigen::Vector3i(4, 3, 2));
     tensor.addEntry(Eigen::Vector3i(0, 0, 0), 85.0);
     tensor.addEntry(Eigen::Vector3i(1, 0, 0), 15.0);
