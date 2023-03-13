@@ -9,15 +9,6 @@
 #include "Test_Utils.h"
 
 int main() {
-    test_utils();
-    test_timer();
-    test_logger();
-    test_json();
-    test_transformation();
-    test_finitedifference();
-    test_trajectory();
-    test_tensor();
-    test_eulerangle();
-
-    return 0;
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();
 }

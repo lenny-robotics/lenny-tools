@@ -1,11 +1,12 @@
 #pragma once
 
+#include <gtest/gtest.h>
 #include <lenny/tools/Logger.h>
 #include <lenny/tools/Transformation.h>
 
 #include <iostream>
 
-void test_transformation() {
+TEST(tools, Transformation) {
     using namespace lenny::tools;
 
     Transformation origin;
@@ -24,24 +25,17 @@ void test_transformation() {
 
     const Transformation t_local_test = origin.getLocalCoordinates(t_global);
 
-    auto test = [](bool passed) -> void {
-        if (passed)
-            std::cout << "TEST PASSED" << std::endl;
-        else
-            std::cerr << "TEST FAILED" << std::endl;
-    };
+    EXPECT_TRUE(p_global.isApprox(p_local));
+    EXPECT_TRUE(v_global.isApprox(v_local));
+    EXPECT_TRUE(q_global.isApprox(q_local));
+    EXPECT_TRUE(m_global.isApprox(m_local));
+    EXPECT_TRUE(t_global.isApprox(t_local));
 
-    test(p_global.isApprox(p_local));
-    test(v_global.isApprox(v_local));
-    test(q_global.isApprox(q_local));
-    test(m_global.isApprox(m_local));
-    test(t_global.isApprox(t_local));
-
-    test(origin.getLocalCoordinatesForPoint(p_global).isApprox(p_local));
-    test(origin.getLocalCoordinatesForVector(v_global).isApprox(v_local));
-    test(origin.getLocalCoordinates(q_global).isApprox(q_local));
-    test(origin.getLocalCoordinates(m_global).isApprox(m_local));
-    test(t_local.isApprox(t_local_test));
+    EXPECT_TRUE(origin.getLocalCoordinatesForPoint(p_global).isApprox(p_local));
+    EXPECT_TRUE(origin.getLocalCoordinatesForVector(v_global).isApprox(v_local));
+    EXPECT_TRUE(origin.getLocalCoordinates(q_global).isApprox(q_local));
+    EXPECT_TRUE(origin.getLocalCoordinates(m_global).isApprox(m_local));
+    EXPECT_TRUE(t_local.isApprox(t_local_test));
 
     std::cout << t_local << std::endl;
     LENNY_LOG_INFO("Transformation: %s\n", Transformation::to_string(t_local).c_str());
@@ -51,5 +45,5 @@ void test_transformation() {
     std::cout << js << std::endl;
     Transformation t_local_test2;
     Transformation::from_json(js, t_local_test2);
-    test(t_local_test.isApprox(t_local_test2));
+    EXPECT_TRUE(t_local_test.isApprox(t_local_test2));
 }

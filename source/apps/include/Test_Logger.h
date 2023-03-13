@@ -1,5 +1,6 @@
 #pragma once
 
+#include <gtest/gtest.h>
 #include <lenny/tools/Logger.h>
 
 #include <thread>
@@ -9,7 +10,7 @@ void log_test(int n) {
     LENNY_LOG_WARNING("%d", n);
 }
 
-void test_logger() {
+TEST(tools, Logger) {
     using lenny::tools::Logger;
     std::thread threads[30];
 
