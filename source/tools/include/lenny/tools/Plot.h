@@ -94,6 +94,11 @@ public:
         return true;
     }
 
+    //Get data
+    const std::vector<std::pair<float, T>> &getData() const {
+        return data;
+    }
+
 protected:
     //Helpers
     int getSize() const {
