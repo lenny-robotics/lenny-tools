@@ -99,6 +99,11 @@ public:
         return data;
     }
 
+    //Get title
+    const std::string& getTitle() const {
+        return title;
+    }
+
 protected:
     //Helpers
     int getSize() const {
@@ -107,7 +112,7 @@ protected:
         return maxSize;
     }
 
-    const std::pair<float, T> &getData(int idx) {
+    const std::pair<float, T> &getData(int idx) const {
         if (data.size() < maxSize)
             return data[idx];
         return data[(offset + idx) % maxSize];
