@@ -32,6 +32,16 @@ public:
     virtual void SameLine(float offset_from_start_x = 0.f, float spacing = -1.f) const {}
     virtual void NewLine() const {}
 
+    virtual bool BeginCombo(const char* label, const char* preview_value, int flags = 0) const {
+        return false;
+    }
+    virtual void EndCombo() const {}
+
+    virtual bool Selectable(const char* label, bool selected, int flags = 0) const {
+        return false;
+    }
+    virtual void SetItemDefaultFocus() const {}
+
     //--- Sliders
     virtual bool Slider(const char* label, double& value, const double& min, const double& max, const char* format = nullptr, int flags = 0) const {
         return false;
@@ -118,6 +128,41 @@ public:
     }
     virtual bool ColorPicker4(const char* label, Eigen::Vector4d& color) const {
         return false;
+    }
+
+    // --- Enum selection
+    template <typename T_enum>
+    inline bool EnumSelection(const char* label, uint& selectionIndex) {
+        constexpr std::size_t enum_count = magic_enum::enum_count<T_enum>();
+        if (selectionIndex >= enum_count)
+            LENNY_LOG_ERROR("Invalid selection index")
+
+        bool selected = false;
+        constexpr auto enum_names = magic_enum::enum_names<T_enum>();
+        const std::string selectedString = std::string(enum_names.at(selectionIndex));
+        if (BeginCombo(label, selectedString.c_str())) {
+            for (uint i = 0; i < enum_count; i++) {
+                const std::string currentElement = std::string(enum_names[i]);
+                const bool is_selected = (selectedString == currentElement);
+                if (Selectable(currentElement.c_str(), &is_selected)) {
+                    selectionIndex = i;
+                    selected = true;
+                }
+                if (is_selected)
+                    SetItemDefaultFocus();
+            }
+
+            EndCombo();
+        }
+        return selected;
+    }
+
+    template <typename T_enum>
+    inline bool EnumSelection(const char* label, T_enum& selection) {
+        uint selectionIndex = selection;
+        const bool selected = EnumSelection<T_enum>(label, selectionIndex);
+        selection = static_cast<T_enum>(selectionIndex);
+        return selected;
     }
 
 public:
